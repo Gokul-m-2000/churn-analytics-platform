@@ -1,1 +1,31 @@
-venv/ 
+# Virtual Environments
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Environment variables
+.env
+backend/.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large datasets not used by churn project
+data/Online_retail.csv
+data/Online Retail.xlsx
+
+# Generated status file
+backend/pipeline_status.txt 
+
+# Archived development files
+archive/

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retention OS | Executive Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .bg-grid-pattern { background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; }
+        @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } }
+        .animate-blob { animation: blob 10s infinite alternate; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+        .glass-card:hover { box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.15); transform: translateY(-2px); }
+    </style>
+</head>
+<body class="min-h-screen relative">
+
+    <div class="fixed inset-0 w-full h-full overflow-hidden -z-10 bg-slate-50">
+        <div class="absolute inset-0 bg-grid-pattern opacity-40"></div>
+        <div class="absolute top-0 -left-10 w-[500px] h-[500px] bg-cyan-300/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob"></div>
+        <div class="absolute top-0 -right-10 w-[500px] h-[500px] bg-violet-300/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-32 left-1/3 w-[500px] h-[500px] bg-rose-300/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-4000"></div>
+    </div>
+
+    <nav class="bg-white/70 backdrop-blur-xl border-b border-white sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex items-center space-x-8">
+                <div class="flex items-center">
+                    <div class="h-8 w-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center mr-3 shadow-md shadow-indigo-200">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <span class="font-extrabold text-xl bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 tracking-tight">Retention OS</span>
+                </div>
+                <div class="hidden md:flex space-x-2">
+                    <a href="dashboard.html" id="nav-dash" class="flex items-center px-4 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-semibold text-sm transition-all">Dashboard</a>
+                    <a href="simulator.html" id="nav-sim" class="flex items-center px-4 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-semibold text-sm transition-all">What-If Simulator</a>
+                    <a href="admin.html" id="admin-nav-tab" class="hidden flex items-center px-4 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-semibold text-sm transition-all">Admin Control</a>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4 ml-auto pl-6 border-l border-slate-200">
+                <div class="text-right hidden md:block">
+                    <p class="text-xs font-extrabold text-slate-900 leading-none" id="user-name-display">--</p>
+                    <span id="user-role-badge" class="mt-1 inline-block">--</span>
+                </div>
+                <div class="relative group">
+                    <button class="h-10 w-10 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-center hover:ring-4 hover:ring-indigo-500/10 transition-all overflow-hidden">
+                        <div class="h-full w-full bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        </div>
+                    </button>
+                    <div class="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100] transform origin-top-right group-hover:translate-y-0 translate-y-2">
+                        <button onclick="handleLogout()" class="w-full flex items-center px-4 py-2.5 text-xs font-bold text-rose-500 hover:bg-rose-50 transition-colors">
+                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                            Logout Session
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+    <main class="max-w-7xl mx-auto w-full px-6 lg:px-8 py-10 space-y-8 pb-20 relative z-10">
+        
+        <header class="mb-10">
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Executive Dashboard</h1>
+            <p class="text-slate-500 mt-2 text-base font-medium">Real-time churn analytics and revenue protection metrics.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Active Accounts</h3>
+                    <div class="p-2 bg-blue-100/50 text-blue-600 rounded-lg border border-blue-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></div>
+                </div>
+                <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="kpi-active">--</div>
+            </div>
+            
+            <div class="glass-card rounded-2xl p-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-red-600"></div>
+                <div class="flex justify-between items-start mb-4 mt-1">
+                    <h3 class="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Risk Rate</h3>
+                    <div class="p-2 bg-rose-100/50 text-rose-600 rounded-lg border border-rose-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg></div>
+                </div>
+                <div class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-red-600 tracking-tight" id="kpi-rate">--%</div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Revenue at Risk</h3>
+                    <div class="p-2 bg-emerald-100/50 text-emerald-600 rounded-lg border border-emerald-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                </div>
+                <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="kpi-revenue">--</div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Avg Tenure</h3>
+                    <div class="p-2 bg-violet-100/50 text-violet-600 rounded-lg border border-violet-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                </div>
+                <div class="text-3xl font-extrabold text-slate-900 tracking-tight" id="kpi-tenure">-- <span class="text-lg font-medium text-slate-400">mos</span></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="glass-card rounded-3xl p-8 lg:col-span-1 flex flex-col">
+                <div class="w-full text-left mb-6">
+                    <h2 class="text-lg font-bold text-slate-900">Risk Distribution</h2>
+                </div>
+                <div class="relative flex-1 min-h-[250px] w-full max-w-[250px] mx-auto">
+                    <canvas id="riskChart"></canvas>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-8 lg:col-span-2 flex flex-col">
+                <div class="w-full text-left mb-6">
+                    <h2 class="text-lg font-bold text-slate-900">Global Churn Drivers</h2>
+                    <p class="text-sm text-slate-500 mt-1">SHAP values aggregating the top reasons for predicted churn risk.</p>
+                </div>
+                <div class="relative flex-1 min-h-[250px] w-full">
+                    <canvas id="driverChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-3xl overflow-hidden">
+            <div class="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-white/40">
+                <h2 class="text-lg font-bold text-slate-900">Critical Accounts</h2>
+                <span class="bg-gradient-to-r from-rose-100 to-red-100 text-rose-700 py-1.5 px-4 rounded-full text-xs font-bold border border-rose-200/50" id="badge-high-risk">-- At Risk</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-600">
+                    <thead class="bg-slate-50/50 text-slate-400 font-bold uppercase tracking-widest text-[11px]">
+                        <tr>
+                            <th class="px-8 py-4">Account ID</th>
+                            <th class="px-8 py-4">Risk Score</th>
+                            <th class="px-8 py-4">Primary Driver</th>
+                            <th class="px-8 py-4">Contract</th>
+                            <th class="px-8 py-4">Monthly Bill</th>
+                            <th class="px-8 py-4 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="critical-table-body" class="divide-y divide-slate-100/80">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function loadDashboard() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/dashboard');
+                const data = await response.json();
+                if (data.error) return;
+
+                document.getElementById('kpi-active').innerText = data.kpis.total_active_customers.toLocaleString();
+                document.getElementById('kpi-rate').innerText = data.kpis.predicted_churn_rate + "%";
+                document.getElementById('kpi-revenue').innerText = "$" + data.kpis.revenue_at_risk.toLocaleString(undefined, {minimumFractionDigits: 2});
+                document.getElementById('kpi-tenure').innerHTML = `${data.kpis.avg_tenure} <span class="text-lg font-medium text-slate-400">mos</span>`;
+                document.getElementById('badge-high-risk').innerText = `${data.kpis.high_risk_accounts} At Risk`;
+
+                const ctxRisk = document.getElementById('riskChart').getContext('2d');
+                
+                // FIXED GRADIENTS FOR LEGEND ACCURACY
+                const gradHigh = ctxRisk.createLinearGradient(0, 0, 0, 300);
+                gradHigh.addColorStop(0, '#ef4444'); // Pure Red
+                gradHigh.addColorStop(1, '#b91c1c'); // Dark Red
+
+                const gradMedium = ctxRisk.createLinearGradient(0, 0, 0, 300);
+                gradMedium.addColorStop(0, '#f59e0b'); // Amber/Orange
+                gradMedium.addColorStop(1, '#ea580c'); // Dark Orange
+
+                const gradLow = ctxRisk.createLinearGradient(0, 0, 0, 300);
+                gradLow.addColorStop(0, '#10b981'); // Emerald Green
+                gradLow.addColorStop(1, '#047857'); // Dark Green
+
+                new Chart(ctxRisk, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+                        datasets: [{
+                            data: [data.charts.risk_tiers["High Risk"], data.charts.risk_tiers["Medium Risk"], data.charts.risk_tiers["Low Risk"]],
+                            backgroundColor: [gradHigh, gradMedium, gradLow],
+                            borderWidth: 0, 
+                            hoverOffset: 6
+                        }]
+                    },
+                    options: { 
+                        maintainAspectRatio: false, 
+                        cutout: '75%', 
+                        plugins: { 
+                            legend: { 
+                                position: 'bottom', 
+                                labels: { 
+                                    usePointStyle: true, 
+                                    padding: 20, 
+                                    font: { family: 'Plus Jakarta Sans', weight: '600' } 
+                                } 
+                            } 
+                        } 
+                    }
+                });
+
+                const ctxDriver = document.getElementById('driverChart').getContext('2d');
+                const gradientBar = ctxDriver.createLinearGradient(0, 0, 600, 0);
+                gradientBar.addColorStop(0, '#818cf8'); 
+                gradientBar.addColorStop(1, '#c084fc'); 
+
+                const driverLabels = Object.keys(data.charts.top_churn_drivers).map(l => l.replace('_', ' '));
+                new Chart(ctxDriver, {
+                    type: 'bar',
+                    data: {
+                        labels: driverLabels,
+                        datasets: [{
+                            data: Object.values(data.charts.top_churn_drivers),
+                            backgroundColor: gradientBar, 
+                            borderRadius: 6, 
+                            barPercentage: 0.5
+                        }]
+                    },
+                    options: { 
+                        maintainAspectRatio: false, indexAxis: 'y',
+                        plugins: { legend: { display: false } },
+                        scales: { 
+                            x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans' } } }, 
+                            y: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', weight: '600', color: '#475569' } } } 
+                        }
+                    }
+                });
+
+                const tbody = document.getElementById('critical-table-body');
+                data.critical_customers.forEach(cust => {
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-indigo-50/30 transition-colors group";
+                    row.innerHTML = `
+                        <td class="px-8 py-5 font-bold text-slate-900">${cust.customerID}</td>
+                        <td class="px-8 py-5">
+                            <div class="flex items-center">
+                                <span class="font-extrabold text-rose-600 mr-3 w-10">${cust.risk_score}%</span>
+                                <div class="w-20 bg-slate-200/50 rounded-full h-2 overflow-hidden shadow-inner">
+                                    <div class="bg-gradient-to-r from-rose-400 to-rose-600 h-full rounded-full shadow-sm" style="width: ${cust.risk_score}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-8 py-5"><span class="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1.5 rounded-md border border-slate-200/50">${cust.top_driver.replace('_', ' ')}</span></td>
+                        <td class="px-8 py-5 font-medium text-slate-600">${cust.contract}</td>
+                        <td class="px-8 py-5 font-bold text-slate-800">$${cust.monthly_charge}</td>
+                        <td class="px-8 py-5 text-right">
+                            <button onclick="window.location.href='simulator.html?id=${cust.customerID}'" class="px-4 py-2 text-xs font-bold text-indigo-600 bg-white border border-indigo-100 rounded-lg shadow-sm hover:bg-indigo-50 hover:border-indigo-200 hover:shadow transition-all opacity-0 group-hover:opacity-100 focus:opacity-100">
+                                Simulate Offer
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+            } catch (error) { console.error("API Error:", error); }
+        }
+
+        window.onload = loadDashboard;
+    </script>
+    <script src="auth.js"></script>
+</body>
+</html>

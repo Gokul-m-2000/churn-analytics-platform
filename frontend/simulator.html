@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retention OS | AI Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .bg-grid-pattern { background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; }
+        @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 66% { transform: translate(-20px, 20px) scale(0.9); } 100% { transform: translate(0px, 0px) scale(1); } }
+        .animate-blob { animation: blob 10s infinite alternate; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
+        .glass-input { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(203, 213, 225, 0.6); backdrop-filter: blur(4px); transition: all 0.2s; }
+        .glass-input:focus { background: #fff; border-color: #818cf8; box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.1); outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #4f46e5; cursor: pointer; border: 3px solid #fff; box-shadow: 0 0 10px rgba(79, 70, 229, 0.3); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen relative">
+
+    <div class="fixed inset-0 w-full h-full overflow-hidden -z-10 bg-slate-50">
+        <div class="absolute inset-0 bg-grid-pattern opacity-40"></div>
+        <div class="absolute top-0 -left-10 w-[500px] h-[500px] bg-cyan-300/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob"></div>
+        <div class="absolute top-0 -right-10 w-[500px] h-[500px] bg-violet-300/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-32 left-1/3 w-[500px] h-[500px] bg-rose-300/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-4000"></div>
+    </div>
+
+    <nav class="bg-white/70 backdrop-blur-xl border-b border-white sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex items-center space-x-8">
+                <div class="flex items-center">
+                    <div class="h-8 w-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center mr-3 shadow-md shadow-indigo-200">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <span class="font-extrabold text-xl bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 tracking-tight">Retention OS</span>
+                </div>
+                <div class="hidden md:flex space-x-2">
+                    <a href="dashboard.html" id="nav-dash" class="flex items-center px-4 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-semibold text-sm transition-all">Dashboard</a>
+                    <a href="simulator.html" id="nav-sim" class="flex items-center px-4 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-semibold text-sm transition-all">What-If Simulator</a>
+                    <a href="admin.html" id="admin-nav-tab" class="hidden flex items-center px-4 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg font-semibold text-sm transition-all">Admin Control</a>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4 ml-auto pl-6 border-l border-slate-200">
+                <div class="text-right hidden md:block">
+                    <p class="text-xs font-extrabold text-slate-900 leading-none" id="user-name-display">--</p>
+                    <span id="user-role-badge" class="mt-1 inline-block">--</span>
+                </div>
+                <div class="relative group">
+                    <button class="h-10 w-10 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-center hover:ring-4 hover:ring-indigo-500/10 transition-all overflow-hidden">
+                        <div class="h-full w-full bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        </div>
+                    </button>
+                    <div class="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100] transform origin-top-right group-hover:translate-y-0 translate-y-2">
+                        <button onclick="handleLogout()" class="w-full flex items-center px-4 py-2.5 text-xs font-bold text-rose-500 hover:bg-rose-50 transition-colors">
+                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                            Logout Session
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+    <main class="max-w-7xl mx-auto w-full px-6 lg:px-8 py-10 pb-20 relative z-10">
+        <header class="mb-10 flex justify-between items-end">
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">AI Retention Simulator</h1>
+                <p class="text-slate-500 mt-2 text-base font-medium">Simulate new contract terms to evaluate risk and generate AI-guided retention strategies.</p>
+            </div>
+            
+            <div class="relative w-80 shadow-sm">
+                <svg class="absolute left-3 top-2.5 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" id="searchInput" placeholder="Enter Customer ID..." 
+                       class="w-full bg-white/80 border border-slate-200/80 rounded-lg py-2 pl-9 pr-20 focus:ring-2 focus:ring-indigo-500/50 outline-none text-sm transition-all shadow-inner font-semibold">
+                <button onclick="searchCustomer()" class="absolute right-1.5 top-1.5 bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-md hover:bg-slate-800 transition-colors">Load</button>
+            </div>
+        </header>
+
+        <div id="statusMessage" class="hidden mb-6 p-4 rounded-xl text-sm font-semibold border"></div>
+
+        <div class="relative">
+            <div id="lockOverlay" class="absolute inset-0 z-20 flex items-center justify-center bg-white/40 backdrop-blur-sm rounded-3xl border border-white/60">
+                <div class="text-center bg-white p-8 rounded-3xl shadow-2xl border border-slate-100 max-w-sm">
+                    <div id="lock-icon" class="mb-4">
+                        <svg class="w-10 h-10 mx-auto text-indigo-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path></svg>
+                    </div>
+                    <h3 id="lock-title" class="text-xl font-bold text-slate-800 tracking-tight">Workspace Locked</h3>
+                    <p id="lock-text" class="text-sm text-slate-500 mt-2 leading-relaxed font-medium">Search for a Customer ID to unlock the retention strategy workspace.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 opacity-40 pointer-events-none transition-all duration-700 ease-in-out" id="simulatorWorkspace">
+                
+                <div class="glass-card rounded-3xl p-8 flex flex-col">
+                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-6">Current Account</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Customer ID</p>
+                            <p class="text-xl font-extrabold text-slate-900" id="prof-id">--</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Risk Evaluation</p>
+                            <div class="flex items-center mt-1">
+                                <span class="text-3xl font-extrabold text-slate-400 mr-3" id="prof-risk">--%</span>
+                                <span class="px-2.5 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded uppercase tracking-tighter" id="prof-tier">--</span>
+                            </div>
+                        </div>
+                        <div class="pt-6 border-t border-slate-100">
+                            <p class="text-[11px] font-bold text-slate-400 uppercase mb-4 tracking-wider" id="driver-label">Primary Churn Drivers</p>
+                            <div class="space-y-2.5" id="driver-list">
+                                <span class="text-xs font-bold text-slate-500 italic">No data loaded...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-3xl p-8 flex flex-col border-indigo-100/50 shadow-[0_0_40px_-15px_rgba(99,102,241,0.2)]">
+                    <h2 class="text-[10px] font-bold text-indigo-500 uppercase tracking-[0.2em] mb-6">Retention Offer Builder</h2>
+                    
+                    <div id="offer-builder-form" class="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-2 uppercase tracking-wide">New Contract</label>
+                            <select id="sim-contract" class="w-full glass-input rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800">
+                                <option value="Month-to-month">Month-to-month</option>
+                                <option value="One year">One year</option>
+                                <option value="Two year">Two year</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-2 uppercase tracking-wide">Monthly Price Adjustment</label>
+                            <input type="range" id="sim-price" min="20" max="150" step="0.5" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" oninput="document.getElementById('price-val').innerText = '$' + this.value">
+                            <div class="flex justify-between mt-1"><span class="text-[10px] font-bold text-slate-400">$20</span><span class="text-sm font-extrabold text-indigo-600" id="price-val">$70.00</span><span class="text-[10px] font-bold text-slate-400">$150</span></div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 border-t border-slate-100 pt-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Internet Service</label>
+                                <select id="sim-internet" class="w-full glass-input rounded-lg px-2 py-2 text-[11px] font-bold">
+                                    <option value="Fiber optic">Fiber optic</option><option value="DSL">DSL</option><option value="No">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Tech Support</label>
+                                <select id="sim-tech" class="w-full glass-input rounded-lg px-2 py-2 text-[11px] font-bold">
+                                    <option value="Yes">Yes</option><option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Online Security</label>
+                                <select id="sim-security" class="w-full glass-input rounded-lg px-2 py-2 text-[11px] font-bold">
+                                    <option value="Yes">Yes</option><option value="No">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Online Backup</label>
+                                <select id="sim-backup" class="w-full glass-input rounded-lg px-2 py-2 text-[11px] font-bold">
+                                    <option value="Yes">Yes</option><option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 pb-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Streaming TV</label>
+                                <select id="sim-tv" class="w-full glass-input rounded-lg px-2 py-2 text-[11px] font-bold">
+                                    <option value="Yes">Yes</option><option value="No">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Streaming Movies</label>
+                                <select id="sim-movies" class="w-full glass-input rounded-lg px-2 py-2 text-[11px] font-bold">
+                                    <option value="Yes">Yes</option><option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button onclick="runSimulation()" class="w-full mt-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold py-4 rounded-2xl shadow-lg hover:shadow-indigo-300 hover:-translate-y-0.5 transition-all flex justify-center items-center uppercase tracking-widest">
+                            <span id="btn-text">Generate Strategy</span>
+                        </button>
+                    </div>
+
+                    <div id="low-risk-message" class="hidden flex-1 flex flex-col items-center justify-center text-center px-4">
+                        <div class="h-20 w-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 tracking-tight">Healthy Account</h3>
+                        <p class="text-sm text-slate-500 mt-2 font-medium leading-relaxed">Retention strategies are suspended for low-risk accounts to protect profit margins.</p>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-3xl p-8 flex flex-col bg-gradient-to-b from-white/80 to-indigo-50/50">
+                    <h2 class="text-[10px] font-bold text-purple-600 uppercase tracking-[0.2em] mb-6 flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Strategy Desk
+                    </h2>
+                    
+                    <div id="ai-strategy-content" class="flex-1 flex flex-col">
+                        <div class="mb-6 p-6 bg-white/60 rounded-3xl border border-white shadow-inner text-center">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">New Risk Score</p>
+                            <div class="text-5xl font-extrabold text-slate-300" id="res-risk">--%</div>
+                            <p class="text-[11px] font-bold text-emerald-600 mt-2 hidden" id="res-diff">--</p>
+                        </div>
+
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-[9px] font-extrabold bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded border border-indigo-200 uppercase tracking-widest">
+                                    AI Recommendation
+                                </span>
+                                <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            </div>
+                            <div class="relative h-full max-h-[300px] overflow-y-auto pr-2 custom-scrollbar bg-slate-50/50 rounded-2xl p-4 border border-slate-100 shadow-inner">
+                                <p id="res-script" class="text-slate-700 font-semibold text-sm leading-relaxed italic">
+                                    Awaiting parameters to build strategy...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="ai-strategy-empty" class="hidden flex-1 flex items-center justify-center text-center">
+                        <p class="text-sm text-slate-400 font-medium italic">Desk inactive for this tier.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentCustomerData = null;
+        let originalRiskScore = 0;
+        let topDrivers = [];
+
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idToLoad = urlParams.get('id');
+            
+            if(idToLoad) {
+                // UI: Update Lock Screen to "Loading..." status immediately
+                document.getElementById('lock-title').innerText = "Fetching Data...";
+                document.getElementById('lock-text').innerText = `Loading analytics for ${idToLoad}. Please wait...`;
+                document.getElementById('lock-icon').innerHTML = '<svg class="w-10 h-10 mx-auto text-indigo-500 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+                
+                document.getElementById('searchInput').value = idToLoad;
+                searchCustomer();
+            }
+        };
+
+        async function searchCustomer() {
+            const customerId = document.getElementById('searchInput').value.trim();
+            if(!customerId) return;
+            
+    
+            // Immediately clear previous simulation results so UI doesn't look "stale"
+            document.getElementById('res-risk').innerText = '--%';
+            document.getElementById('res-risk').className = 'text-5xl font-extrabold text-slate-300';
+            document.getElementById('res-script').innerText = 'Awaiting parameters to build strategy...';
+            // Use optional chaining to prevent crash if res-diff doesn't exist in your HTML
+            document.getElementById('res-diff')?.classList.add('hidden');
+
+            try {
+                const searchRes = await fetch(`http://127.0.0.1:8000/api/search?query=${customerId}`);
+                const searchData = await searchRes.json();
+                
+                if (searchData.length === 0) {
+                    showMessage("Customer ID not found.", true);
+                    resetLockScreen(); // Show normal lock screen again
+                    return;
+                }
+                
+                const profileRes = await fetch(`http://127.0.0.1:8000/api/customer/${searchData[0].id}`);
+                const data = await profileRes.json();
+
+                currentCustomerData = data.profile;
+                originalRiskScore = data.prediction.risk_score;
+                topDrivers = [data.prediction.top_driver_1, data.prediction.top_driver_2, data.prediction.top_driver_3];
+
+                // UNLOCK WORKSPACE
+                document.getElementById('lockOverlay').classList.add('hidden');
+                document.getElementById('simulatorWorkspace').classList.remove('opacity-40', 'pointer-events-none');
+
+                // Toggle logic for Risk Tiers
+                const isLow = data.prediction.risk_tier === "Low Risk";
+                document.getElementById('offer-builder-form').classList.toggle('hidden', isLow);
+                document.getElementById('low-risk-message').classList.toggle('hidden', !isLow);
+                document.getElementById('ai-strategy-content').classList.toggle('hidden', isLow);
+                document.getElementById('ai-strategy-empty').classList.toggle('hidden', !isLow);
+
+                // Update Profile Info
+                const riskColor = isLow ? "text-emerald-500" : (data.prediction.risk_tier === "Medium Risk" ? "text-amber-500" : "text-rose-600");
+                document.getElementById('prof-risk').className = `text-3xl font-extrabold ${riskColor} mr-3`;
+                document.getElementById('prof-id').innerText = currentCustomerData.customerID;
+                document.getElementById('prof-risk').innerText = (originalRiskScore * 100).toFixed(1) + "%";
+                document.getElementById('prof-tier').innerText = data.prediction.risk_tier;
+                
+                // Show Drivers list
+                document.getElementById('driver-list').innerHTML = topDrivers.map(d => `<div class="text-[11px] font-bold text-slate-700 bg-white py-2 px-3 rounded-xl border border-slate-200 shadow-sm transition-all hover:border-indigo-200">${d.replace(/_/g, ' ')}</div>`).join('');
+
+                // Map form values to current state
+                document.getElementById('sim-contract').value = currentCustomerData.Contract;
+                document.getElementById('sim-price').value = currentCustomerData.MonthlyCharges;
+                document.getElementById('price-val').innerText = '$' + currentCustomerData.MonthlyCharges;
+                document.getElementById('sim-internet').value = currentCustomerData.InternetService;
+                
+                ['TechSupport', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'StreamingTV', 'StreamingMovies'].forEach(field => {
+                    const el = document.getElementById(`sim-${field.toLowerCase().replace('streaming', '')}`);
+                    if(el) el.value = currentCustomerData[field];
+                });
+
+                showMessage("Account data synchronized successfully.");
+            } catch (error) { 
+                showMessage("Communication error with API.", true);
+                resetLockScreen();
+            }
+            
+        }
+
+        async function runSimulation() {
+    if (!currentCustomerData) return;
+
+    document.getElementById('btn-text').innerText = "OPTIMIZING...";
+    document.getElementById('res-script').innerHTML = '<span class="animate-pulse text-indigo-500 font-bold">🧠 AI is analyzing drivers...</span>';
+
+    // Build the payload to match the Backend's SimulatorPayload class exactly
+    const payload = {
+        customerID: currentCustomerData.customerID,
+        tenure: currentCustomerData.tenure, // Tenure usually isn't a slider, but we send it
+        Contract: document.getElementById('sim-contract').value,
+        MonthlyCharges: parseFloat(document.getElementById('sim-price').value),
+        InternetService: document.getElementById('sim-internet').value,
+        OnlineSecurity: document.getElementById('sim-security').value,
+        OnlineBackup: document.getElementById('sim-backup').value,
+        DeviceProtection: currentCustomerData.DeviceProtection, // Using DB baseline for non-slider fields
+        TechSupport: document.getElementById('sim-tech').value,
+        StreamingTV: document.getElementById('sim-tv').value,
+        StreamingMovies: document.getElementById('sim-movies').value,
+        PaperlessBilling: currentCustomerData.PaperlessBilling,
+        PaymentMethod: currentCustomerData.PaymentMethod
+    };
+
+    try {
+        const response = await fetch('http://127.0.0.1:8000/api/simulate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        
+        // Update Risk Score with Color Logic
+        const newScore = result.simulated_risk_score;
+        const resRiskEl = document.getElementById('res-risk');
+        resRiskEl.innerText = (newScore * 100).toFixed(1) + "%";
+        
+        // Dynamic color based on risk
+        if(newScore > 0.7) resRiskEl.className = "text-5xl font-extrabold text-rose-600";
+        else if(newScore > 0.4) resRiskEl.className = "text-5xl font-extrabold text-amber-500";
+        else resRiskEl.className = "text-5xl font-extrabold text-emerald-500";
+
+        // Display LLM Strategy
+        document.getElementById('res-script').innerText = result.prescriptive_strategy;
+
+    } catch (error) { 
+        console.error("Simulation failed:", error);
+        document.getElementById('res-script').innerText = "Strategy Desk Busy. Please retry.";
+    } finally { 
+        document.getElementById('btn-text').innerText = "Generate Strategy"; 
+    }
+}
+        function resetLockScreen() {
+            document.getElementById('lockOverlay').classList.remove('hidden');
+            document.getElementById('lock-title').innerText = "Workspace Locked";
+            document.getElementById('lock-text').innerText = "Search for a Customer ID to unlock the retention strategy workspace.";
+            document.getElementById('lock-icon').innerHTML = '<svg class="w-10 h-10 mx-auto text-indigo-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path></svg>';
+        }
+
+        function showMessage(msg, isError = false) {
+            const el = document.getElementById('statusMessage');
+            el.className = `mb-6 p-4 rounded-xl text-[11px] font-bold border ${isError ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`;
+            el.innerText = msg;
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 4000);
+        }
+    </script>
+    <script src="auth.js"></script>
+</body>
+</html>

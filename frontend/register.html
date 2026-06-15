@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retention OS | Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; overflow: hidden; }
+        .bg-grid-pattern { background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
+        @keyframes blob { 0% { transform: translate(0px, 0px) scale(1); } 33% { transform: translate(30px, -50px) scale(1.1); } 100% { transform: translate(0px, 0px) scale(1); } }
+        .animate-blob { animation: blob 10s infinite alternate; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center relative">
+    <div class="fixed inset-0 -z-10 bg-slate-50">
+        <div class="absolute inset-0 bg-grid-pattern opacity-40"></div>
+        <div class="absolute top-0 -left-10 w-[500px] h-[500px] bg-indigo-300/30 rounded-full filter blur-[100px] animate-blob"></div>
+        <div class="absolute -bottom-32 right-1/4 w-[500px] h-[500px] bg-purple-300/30 rounded-full filter blur-[100px] animate-blob animation-delay-2000"></div>
+    </div>
+
+    <div class="glass-card p-10 rounded-3xl w-full max-w-md border border-white shadow-2xl">
+        <div class="flex items-center justify-center mb-8">
+            <div class="h-10 w-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-3 shadow-lg shadow-indigo-200">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+            </div>
+            <span class="font-extrabold text-2xl tracking-tight text-slate-900">Retention OS</span>
+        </div>
+
+        <h2 class="text-xl font-bold text-slate-800 mb-2">Create Account</h2>
+        <p class="text-sm text-slate-500 mb-8 font-medium">Join the platform to begin managing customer churn.</p>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Full Name</label>
+                <input type="text" id="name" placeholder="e.g. Gokul" class="w-full bg-white/60 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700 placeholder:text-slate-300">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
+                <input type="email" id="email" placeholder="admin@churn.os" class="w-full bg-white/60 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700 placeholder:text-slate-300">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Secure Password</label>
+                <input type="password" id="password" class="w-full bg-white/60 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700">
+            </div>
+            
+            <button onclick="handleRegister()" class="w-full mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:shadow-indigo-300 hover:-translate-y-0.5 transition-all uppercase tracking-widest text-xs">
+                Initialize Account
+            </button>
+
+            <p class="text-center text-xs font-bold text-slate-400 mt-6">
+                ALREADY REGISTERED? <a href="login.html" class="text-indigo-600 hover:underline">ACCESS LOGIN</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        async function handleRegister() {
+            const fullName = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!fullName || !email || !password) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            const payload = {
+                full_name: fullName,
+                email: email,
+                password: password
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert("Account Successfully Created!");
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                alert("Could not connect to the Backend API.");
+            }
+        }
+    </script>
+    <script src="auth.js"></script>
+</body>
+</html>
