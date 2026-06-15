@@ -351,15 +351,6 @@ Dashboard Visualization
 
 
 
-
-## Future Improvements
-
-* Automated model retraining
-* Docker containerization
-* Cloud deployment
-* Real-time monitoring dashboard
-* Advanced customer segmentation
-
 ---
 
 
