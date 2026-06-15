@@ -332,7 +332,7 @@ This keeps prediction records synchronized with customer data.
 
 ## Project Architecture
 
-
+```text
 Customer Data
       ↓
 Feature Engineering
@@ -348,7 +348,7 @@ Prediction Storage
 Groq Recommendation Generation
       ↓
 Dashboard Visualization
-
+```
 
 
 ---
