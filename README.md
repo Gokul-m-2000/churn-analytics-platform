@@ -362,8 +362,4 @@ Dashboard Visualization
 
 ---
 
-## Author
 
-**Gokul M**
-
-AI/ML Portfolio Project
